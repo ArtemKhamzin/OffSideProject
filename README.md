@@ -1,2 +1,2 @@
 # OffSideProject
-django project
+Solo django project for KFU Digital lecterns
