@@ -1,0 +1,2 @@
+# OffSideProject
+django project
