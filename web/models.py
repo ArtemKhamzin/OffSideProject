@@ -15,3 +15,4 @@ class Blog(models.Model):
     description = models.CharField(max_length=1024)
     publication_date = models.DateTimeField()
     tags = models.ManyToManyField(BlogTag)
+    image = models.ImageField(upload_to='blogs/', null=True, blank=True)
