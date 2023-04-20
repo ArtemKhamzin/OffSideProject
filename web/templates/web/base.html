@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OffSide</title>
+</head>
+<body>
+    <nav>
+        <h1><a href="{% url 'main' %}">OFFside</a></h1>
+        {% if user.is_anonymous %}
+            <a href="{% url 'registration' %}">Регистрация</a>
+            <a href="{% url 'auth' %}">Вход</a>
+        {% else %}
+            <a href="{% url 'logout' %}">Выход</a>
+        {% endif %}
+    </nav>
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>
