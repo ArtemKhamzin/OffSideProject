@@ -1,15 +1,16 @@
-from datetime import datetime
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from web.forms import RegistrationForm, AuthForm
+from web.forms import RegistrationForm, AuthForm, BlogForm, BlogTagForm
+from web.models import Blog, BlogTag
 
 User = get_user_model()
 
 
 def main_view(request):
-    year = datetime.now().year
+    blogs = Blog.objects.all().order_by('-publication_date')
     return render(request, 'web/main.html', {
-        'year': year
+        'blogs': blogs
     })
 
 
@@ -49,3 +50,40 @@ def auth_view(request):
 def logout_view(request):
     logout(request)
     return redirect("main")
+
+
+@login_required
+def blog_edit_view(request, id=None):
+    blog = get_object_or_404(Blog, user=request.user, id=id) if id is not None else None
+    form = BlogForm(instance=blog)
+    if request.method == 'POST':
+        form = BlogForm(data=request.POST, files=request.FILES, instance=blog, initial={'user': request.user})
+        if form.is_valid():
+            form.save()
+            return redirect('main')
+    return render(request, "web/blog_form.html", {"form": form})
+
+
+@login_required
+def blogs_delete_view(request, id):
+    tag = get_object_or_404(Blog, user=request.user, id=id)
+    tag.delete()
+    return redirect('main')
+
+
+@login_required
+def tags_view(request):
+    tags = BlogTag.objects.all()
+    form = BlogTagForm()
+    if request.method == 'POST':
+        form = BlogTagForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tags')
+    return render(request, "web/tags.html", {"tags": tags, 'form': form})
+
+@login_required
+def tags_delete_view(request, id):
+    tag = get_object_or_404(BlogTag, id=id)
+    tag.delete()
+    return redirect('tags')

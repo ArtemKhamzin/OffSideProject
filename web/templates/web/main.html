@@ -1,7 +1,21 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <h1>hello {{ year }}</h1>
-    {% if not user.is_anonymous %}
-        <h3>Вы авторизованы как {{ user.username }}</h3>
-    {% endif %}
+    <ul>
+        {% for blog in blogs %}
+            <li>
+                <b><h2>{{ blog.title }}</h2></b>
+                {{ blog.short_description }}
+                <br>{{ blog.description }}
+                <small>
+                    <br><br>Опубликовано {{ blog.publication_date }}
+                    <br>Автор: {{ blog.user }}
+                    {% if user == blog.user %}
+                        <br><br><a href="{% url 'blogs_edit' blog.id %}">Редактировать</a>
+                        <a href="{% url 'blogs_delete' blog.id %}">Удалить</a>
+                    {% endif %}
+                </small>
+            </li>
+            <hr size="2" width="1200" noshade="" align="left" color="black">
+        {% endfor %}
+    </ul>
 {% endblock %}

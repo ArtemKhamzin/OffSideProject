@@ -7,14 +7,19 @@
 <body>
     <nav>
         <h1><a href="{% url 'main' %}">OFFside</a></h1>
-        {% if user.is_anonymous %}
-            <a href="{% url 'registration' %}">Регистрация</a>
-            <a href="{% url 'auth' %}">Вход</a>
-        {% else %}
-            <a href="{% url 'logout' %}">Выход</a>
-        {% endif %}
+        <a href="{% url 'blogs_add' %}">Добавить блог</a>
+        <a href="{% url 'tags' %}">Теги</a>
+        <div style="text-align: right">
+            {% if user.is_anonymous %}
+                <a href="{% url 'registration' %}">Регистрация</a>
+                <a href="{% url 'auth' %}">Вход</a>
+            {% else %}
+                <h3>Вы авторизованы как {{ user.username }}</h3>
+                <a href="{% url 'logout' %}">Выход</a>
+            {% endif %}
+        </div>
     </nav>
-    <hr>
+    <hr size="5" noshade="" color="black">
     {% block content %}{% endblock %}
 </body>
 </html>
