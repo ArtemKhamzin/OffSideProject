@@ -45,3 +45,7 @@ class BlogTagForm(forms.ModelForm):
     class Meta:
         model = BlogTag
         fields = ('title',)
+
+
+class BlogFilterForm(forms.Form):
+    search = forms.CharField(label='', widget=forms.TextInput(attrs={"placeholder": "Поиск"}), required=False)

@@ -1,0 +1,19 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <h2>Статистика</h2>
+    <p>
+        <b>Общая статистика</b><br><br>
+        Всего <b>{{ overall_stat.count }}</b> блогов.<br>
+        Первый блог опубликован {{ overall_stat.min_date }}.<br>
+        Последний блог опубликован {{ overall_stat.max_date }}.
+    </p>
+
+    <b>Статистика по дням</b>
+    <ul>
+        {% for day_stat in days_stat %}
+            <li>
+                <b>{{ day_stat.date }}</b> – {{ day_stat.count }} блогов
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

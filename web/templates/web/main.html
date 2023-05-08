@@ -1,14 +1,33 @@
 {% extends 'web/base.html' %}
 {% block content %}
+    <form action="">
+        {% for field in filter_form %}
+            {{ field.label }}
+            {{ field }}
+        {% endfor %}
+
+        <button>Найти</button>
+
+        <a href="?">Показать всё</a>
+    </form>
+    <hr size="2" noshade="" align="left" color="black">
+
     <ul>
         {% for blog in blogs %}
             <li>
                 <b><h2>{{ blog.title }}</h2></b>
+
                 {{ blog.short_description }}
                 <br>{{ blog.description }}
+
                 <small>
-                    <br><br>Опубликовано {{ blog.publication_date }}
-                    <br>Автор: {{ blog.user }}
+                    <br><br>
+                    {% if blog.tags.all %}
+                        Теги: ({{ blog.tags_count }}) {% for tag in blog.tags.all %} [{{ tag.title }}] {% endfor %}
+                    {% endif %}
+                    <br>Автор: {{ blog.user.username }}
+                    <br>Опубликовано {{ blog.publication_date }}
+
                     {% if user == blog.user %}
                         <br><br><a href="{% url 'blogs_edit' blog.id %}">Редактировать</a>
                         <a href="{% url 'blogs_delete' blog.id %}">Удалить</a>
@@ -18,4 +37,19 @@
             <hr size="2" width="1200" noshade="" align="left" color="black">
         {% endfor %}
     </ul>
+
+    <nav align="center">
+        {% if blogs.has_previous %}
+            <a href="?page=1">в начало</a>
+            <a href="?page={{ blogs.previous_page_number }}">предыдующая страница</a>
+        {% endif %}
+
+        страница {{ blogs.number }} из {{ blogs.paginator.num_pages }}
+
+        {% if blogs.has_next %}
+            <a href="?page={{ blogs.next_page_number }}">следующая страница</a>
+            <a href="?page={{ blogs.paginator.num_pages }}">в конец</a>
+        {% endif %}
+    </nav><br>
+
 {% endblock %}

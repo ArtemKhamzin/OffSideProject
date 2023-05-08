@@ -1,6 +1,6 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <h2>Создать блог</h2>
+    <h2>Добавить блог</h2>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}

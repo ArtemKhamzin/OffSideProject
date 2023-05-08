@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Count, Max, Min
+from django.db.models.functions import TruncDate
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from web.forms import RegistrationForm, AuthForm, BlogForm, BlogTagForm
+from web.forms import RegistrationForm, AuthForm, BlogForm, BlogTagForm, BlogFilterForm
 from web.models import Blog, BlogTag
 
 User = get_user_model()
@@ -9,8 +12,42 @@ User = get_user_model()
 
 def main_view(request):
     blogs = Blog.objects.all().order_by('-publication_date')
+
+    filter_form = BlogFilterForm(request.GET)
+    filter_form.is_valid()
+    filters = filter_form.cleaned_data
+
+    if filters['search']:
+        blogs = blogs.filter(title__icontains=filters['search'])
+
+    blogs = blogs.prefetch_related('tags').select_related('user').annotate(tags_count=Count('tags'))
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(blogs, per_page=11)
+
     return render(request, 'web/main.html', {
-        'blogs': blogs
+        'blogs': paginator.get_page(page_number),
+        'filter_form': filter_form
+    })
+
+
+def analytics_view(request):
+    overall_stat = Blog.objects.aggregate(
+        count=Count("id"),
+        max_date=Max("publication_date"),
+        min_date=Min("publication_date")
+    )
+
+    days_stat = (
+        Blog.objects.all()
+        .annotate(date=TruncDate("publication_date"))
+        .values("date")
+        .annotate(count=Count("id"))
+        .order_by('-date')
+    )
+
+    return render(request, 'web/analytics.html', {
+        'overall_stat': overall_stat,
+        'days_stat': days_stat
     })
 
 
@@ -40,16 +77,16 @@ def auth_view(request):
         if form.is_valid():
             user = authenticate(**form.cleaned_data)
             if user is None:
-                form.add_error(None, "Введены неверные данные")
+                form.add_error(None, 'Введены неверные данные')
             else:
                 login(request, user)
-                return redirect("main")
-    return render(request, "web/auth.html", {"form": form})
+                return redirect('main')
+    return render(request, 'web/auth.html', {'form': form})
 
 
 def logout_view(request):
     logout(request)
-    return redirect("main")
+    return redirect('main')
 
 
 @login_required
@@ -61,7 +98,7 @@ def blog_edit_view(request, id=None):
         if form.is_valid():
             form.save()
             return redirect('main')
-    return render(request, "web/blog_form.html", {"form": form})
+    return render(request, 'web/blog_form.html', {'form': form})
 
 
 @login_required
@@ -81,6 +118,7 @@ def tags_view(request):
             form.save()
             return redirect('tags')
     return render(request, "web/tags.html", {"tags": tags, 'form': form})
+
 
 @login_required
 def tags_delete_view(request, id):
